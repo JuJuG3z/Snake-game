@@ -1,64 +1,72 @@
 export class Snake {
   constructor(gridSize) {
     this.gridSize = gridSize;
-    this.body = [{ x: 10, y: 10 }];
-    this.direction = { x: 0, y: 0 };
-    this.nextDirection = { x: 0, y: 0 };
+    this.segments = [{ x: 10, y: 10 }];
+    this.direction = 'right';
+    this.nextDirection = 'right';
   }
 
   move() {
-    this.direction = { ...this.nextDirection };
-    
-    const head = { 
-      x: this.body[0].x + this.direction.x,
-      y: this.body[0].y + this.direction.y
-    };
-    
-    this.body.unshift(head);
-    
-    if (!this.growing) {
-      this.body.pop();
+    this.direction = this.nextDirection;
+    const head = { ...this.segments[0] };
+
+    switch (this.direction) {
+      case 'up': head.y -= 1; break;
+      case 'down': head.y += 1; break;
+      case 'left': head.x -= 1; break;
+      case 'right': head.x += 1; break;
     }
-    this.growing = false;
+
+    this.segments.unshift(head);
+    this.segments.pop();
+  }
+
+  grow() {
+    const tail = { ...this.segments[this.segments.length - 1] };
+    this.segments.push(tail);
   }
 
   changeDirection(key) {
     const directions = {
-      ArrowUp: { x: 0, y: -1 },
-      ArrowDown: { x: 0, y: 1 },
-      ArrowLeft: { x: -1, y: 0 },
-      ArrowRight: { x: 1, y: 0 }
+      'ArrowUp': 'up',
+      'ArrowDown': 'down',
+      'ArrowLeft': 'left',
+      'ArrowRight': 'right'
     };
 
     const newDirection = directions[key];
-    if (newDirection) {
-      if (this.direction.x !== -newDirection.x && this.direction.y !== -newDirection.y) {
-        this.nextDirection = newDirection;
-      }
-    }
-  }
+    if (!newDirection) return;
 
-  eat(food) {
-    const head = this.body[0];
-    if (head.x === food.x && head.y === food.y) {
-      this.growing = true;
-      return true;
+    const opposites = {
+      'up': 'down',
+      'down': 'up',
+      'left': 'right',
+      'right': 'left'
+    };
+
+    if (opposites[newDirection] !== this.direction) {
+      this.nextDirection = newDirection;
     }
-    return false;
   }
 
   checkCollision(width, height) {
-    const head = this.body[0];
+    const head = this.segments[0];
     
     // Wall collision
-    if (head.x < 0 || head.x >= width / this.gridSize ||
-        head.y < 0 || head.y >= height / this.gridSize) {
+    if (head.x < 0 || head.y < 0 || 
+        head.x >= width / this.gridSize || 
+        head.y >= height / this.gridSize) {
       return true;
     }
-    
+
     // Self collision
-    return this.body.slice(1).some(segment => 
+    return this.segments.slice(1).some(segment => 
       segment.x === head.x && segment.y === head.y
     );
+  }
+
+  hasEatenFood(food) {
+    const head = this.segments[0];
+    return head.x === food.x && head.y === food.y;
   }
 }
