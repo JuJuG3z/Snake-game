@@ -1,7 +1,6 @@
 export class Snake {
   constructor(gridSize) {
     this.gridSize = gridSize;
-
     this.reset();
   }
 
@@ -27,19 +26,17 @@ export class Snake {
     } else {
       this.growing = false;
     }
-
   }
 
   changeDirection(key) {
     const directions = {
-      'ArrowUp': 'up',
-      'ArrowDown': 'down',
-      'ArrowLeft': 'left',
-      'ArrowRight': 'right'
+      ArrowUp: { x: 0, y: -1 },
+      ArrowDown: { x: 0, y: 1 },
+      ArrowLeft: { x: -1, y: 0 },
+      ArrowRight: { x: 1, y: 0 }
     };
 
     const newDirection = directions[key];
-
     if (newDirection) {
       // Prevent reversing direction
       if (this.direction.x !== -newDirection.x || 
@@ -49,29 +46,23 @@ export class Snake {
     }
   }
 
-
-    const opposites = {
-      'up': 'down',
-      'down': 'up',
-      'left': 'right',
-      'right': 'left'
-    };
-
-    if (opposites[newDirection] !== this.direction) {
-      this.nextDirection = newDirection;
+  eat(food) {
+    const head = this.body[0];
+    if (head.x === food.x && head.y === food.y) {
+      this.growing = true;
+      return true;
     }
+    return false;
   }
 
   checkCollision(width, height) {
-    const head = this.segments[0];
+    const head = this.body[0];
     
     // Wall collision
-    if (head.x < 0 || head.y < 0 || 
-        head.x >= width / this.gridSize || 
-        head.y >= height / this.gridSize) {
+    if (head.x < 0 || head.x >= width / this.gridSize ||
+        head.y < 0 || head.y >= height / this.gridSize) {
       return true;
     }
-
     
     // Self collision (only check if snake has more than 4 segments)
     if (this.body.length > 4) {
