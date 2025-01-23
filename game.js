@@ -16,6 +16,9 @@ export class Game {
   }
 
   start() {
+    if (this.gameLoop) {
+      clearInterval(this.gameLoop);
+    }
     this.snake = new Snake(this.gridSize);
     this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
     this.score = 0;
@@ -25,6 +28,7 @@ export class Game {
   }
 
   update() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.snake.move();
 
     if (this.snake.checkCollision(this.canvas.width, this.canvas.height)) {
@@ -32,53 +36,50 @@ export class Game {
       return;
     }
 
-    if (this.snake.eat(this.food)) {
-      this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
+    if (this.snake.hasEatenFood(this.food)) {
       this.score += 10;
       this.updateScore();
+      this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
+      this.snake.grow();
     }
 
     this.draw();
   }
 
   draw() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Draw snake
-    this.ctx.shadowBlur = 20;
-    this.ctx.shadowColor = '#0ff';
-    this.ctx.fillStyle = '#0ff';
-    this.snake.body.forEach(segment => {
-      this.ctx.fillRect(
-        segment.x * this.gridSize,
-        segment.y * this.gridSize,
-        this.gridSize - 2,
-        this.gridSize - 2
-      );
-    });
-
     // Draw food
-    this.ctx.shadowColor = '#f0f';
-    this.ctx.fillStyle = '#f0f';
+    this.ctx.fillStyle = '#ff0000';
     this.ctx.fillRect(
       this.food.x * this.gridSize,
       this.food.y * this.gridSize,
-      this.gridSize - 2,
-      this.gridSize - 2
+      this.gridSize,
+      this.gridSize
     );
-  }
 
-  gameOver() {
-    clearInterval(this.gameLoop);
-    this.menu.style.display = 'block';
-  }
-
-  handleInput(e) {
-    this.snake.changeDirection(e.key);
+    // Draw snake
+    this.ctx.fillStyle = '#00ff00';
+    this.snake.segments.forEach(segment => {
+      this.ctx.fillRect(
+        segment.x * this.gridSize,
+        segment.y * this.gridSize,
+        this.gridSize,
+        this.gridSize
+      );
+    });
   }
 
   updateScore() {
     this.scoreElement.textContent = `Score: ${this.score}`;
+  }
+
+  gameOver() {
+    clearInterval(this.gameLoop);
+    this.gameLoop = null;
+    this.menu.style.display = 'flex';
+    this.startButton.textContent = 'Play Again';
+  }
+
+  handleInput(e) {
+    this.snake.changeDirection(e.key);
   }
 }
