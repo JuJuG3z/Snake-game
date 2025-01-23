@@ -7,64 +7,70 @@ export class Game {
     this.ctx = ctx;
     this.scoreElement = scoreElement;
     this.gridSize = 20;
+    
+    // Initialize game elements
     this.snake = new Snake(this.gridSize);
-    this.food = new Food(canvas.width, canvas.height, this.gridSize);
+    this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
+    
+    // Game state
     this.score = 0;
     this.gameLoop = null;
-    this.menu = document.getElementById('menu');
-    this.startButton = document.getElementById('startButton');
     this.isGameRunning = false;
+    
+    // Bind methods
+    this.handleInput = this.handleInput.bind(this);
   }
 
   start() {
     if (this.gameLoop) {
       clearInterval(this.gameLoop);
     }
-    this.snake = new Snake(this.gridSize);
+    
+    // Reset game state
+    this.snake.reset();
     this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
     this.score = 0;
     this.updateScore();
-    this.draw();
-    this.startButton.textContent = 'Restart Game';
+    this.isGameRunning = true;
+    
+    // Start game loop
+    this.gameLoop = setInterval(() => this.update(), 200);
   }
 
   update() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    // Move snake
     this.snake.move();
-
+    
+    // Check collisions
     if (this.snake.checkCollision(this.canvas.width, this.canvas.height)) {
       this.gameOver();
       return;
     }
-
-    if (this.snake.hasEatenFood(this.food)) {
+    
+    // Check if snake eats food
+    if (this.snake.eat(this.food)) {
       this.score += 10;
       this.updateScore();
       this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
-      this.snake.grow();
     }
-
-    this.draw();
+    
+    // Render game
+    this.render();
   }
 
-  draw() {
-    this.ctx.fillStyle = '#ff0000';
-    this.ctx.fillRect(
-      this.food.x * this.gridSize,
-      this.food.y * this.gridSize,
-      this.gridSize,
-      this.gridSize
-    );
-
-    this.ctx.fillStyle = '#00ff00';
-    this.snake.segments.forEach(segment => {
-      this.ctx.fillRect(
-        segment.x * this.gridSize,
-        segment.y * this.gridSize,
-        this.gridSize,
-        this.gridSize
-      );
-    });
+  render() {
+    // Clear canvas
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Draw background
+    this.ctx.fillStyle = '#000000';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Draw food
+    this.food.draw(this.ctx);
+    
+    // Draw snake
+    this.snake.draw(this.ctx);
   }
 
   updateScore() {
@@ -75,16 +81,12 @@ export class Game {
     clearInterval(this.gameLoop);
     this.gameLoop = null;
     this.isGameRunning = false;
-    this.menu.style.display = 'flex';
-    this.startButton.textContent = 'Play Again';
+    alert(`Game Over! Final Score: ${this.score}`);
   }
 
   handleInput(e) {
-    if (e.key === ' ') {
-      if (!this.isGameRunning) {
-        this.isGameRunning = true;
-        this.gameLoop = setInterval(() => this.update(), 150);
-      }
+    if (e.key === ' ' && !this.isGameRunning) {
+      this.start();
     } else {
       this.snake.changeDirection(e.key);
     }
