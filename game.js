@@ -13,6 +13,7 @@ export class Game {
     this.gameLoop = null;
     this.menu = document.getElementById('menu');
     this.startButton = document.getElementById('startButton');
+    this.isGameStarted = false;
   }
 
   start() {
@@ -20,8 +21,20 @@ export class Game {
     this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
     this.score = 0;
     this.updateScore();
-    this.gameLoop = setInterval(() => this.update(), 150);
+    this.isGameStarted = true;
     this.startButton.textContent = 'Restart Game';
+  }
+
+  handleInput(e) {
+    if (e.code === 'Space' && this.isGameStarted && !this.gameLoop) {
+      this.startMovement();
+    }
+  }
+
+  startMovement() {
+    if (!this.gameLoop) {
+      this.gameLoop = setInterval(() => this.update(), 150);
+    }
   }
 
   update() {
@@ -31,51 +44,13 @@ export class Game {
       this.gameOver();
       return;
     }
-
-    if (this.snake.eat(this.food)) {
-      this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
-      this.score += 10;
-      this.updateScore();
-    }
-
-    this.draw();
-  }
-
-  draw() {
-    this.ctx.fillStyle = '#000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Draw snake
-    this.ctx.shadowBlur = 20;
-    this.ctx.shadowColor = '#0ff';
-    this.ctx.fillStyle = '#0ff';
-    this.snake.body.forEach(segment => {
-      this.ctx.fillRect(
-        segment.x * this.gridSize,
-        segment.y * this.gridSize,
-        this.gridSize - 2,
-        this.gridSize - 2
-      );
-    });
-
-    // Draw food
-    this.ctx.shadowColor = '#f0f';
-    this.ctx.fillStyle = '#f0f';
-    this.ctx.fillRect(
-      this.food.x * this.gridSize,
-      this.food.y * this.gridSize,
-      this.gridSize - 2,
-      this.gridSize - 2
-    );
   }
 
   gameOver() {
     clearInterval(this.gameLoop);
+    this.gameLoop = null;
+    this.isGameStarted = false;
     this.menu.style.display = 'block';
-  }
-
-  handleInput(e) {
-    this.snake.changeDirection(e.key);
   }
 
   updateScore() {
