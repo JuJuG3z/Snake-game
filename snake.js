@@ -1,29 +1,33 @@
 export class Snake {
   constructor(gridSize) {
     this.gridSize = gridSize;
-    this.segments = [{ x: 10, y: 10 }];
-    this.direction = 'right';
-    this.nextDirection = 'right';
+
+    this.reset();
+  }
+
+  reset() {
+    this.body = [{ x: 10, y: 10 }];
+    this.direction = { x: 1, y: 0 };
+    this.growing = false;
   }
 
   move() {
-    this.direction = this.nextDirection;
-    const head = { ...this.segments[0] };
-
-    switch (this.direction) {
-      case 'up': head.y -= 1; break;
-      case 'down': head.y += 1; break;
-      case 'left': head.x -= 1; break;
-      case 'right': head.x += 1; break;
+    // Calculate new head position
+    const head = {
+      x: this.body[0].x + this.direction.x,
+      y: this.body[0].y + this.direction.y
+    };
+    
+    // Add new head to body
+    this.body.unshift(head);
+    
+    // Remove tail unless growing
+    if (!this.growing) {
+      this.body.pop();
+    } else {
+      this.growing = false;
     }
 
-    this.segments.unshift(head);
-    this.segments.pop();
-  }
-
-  grow() {
-    const tail = { ...this.segments[this.segments.length - 1] };
-    this.segments.push(tail);
   }
 
   changeDirection(key) {
@@ -35,7 +39,16 @@ export class Snake {
     };
 
     const newDirection = directions[key];
-    if (!newDirection) return;
+
+    if (newDirection) {
+      // Prevent reversing direction
+      if (this.direction.x !== -newDirection.x || 
+          this.direction.y !== -newDirection.y) {
+        this.direction = newDirection;
+      }
+    }
+  }
+
 
     const opposites = {
       'up': 'down',
@@ -59,14 +72,25 @@ export class Snake {
       return true;
     }
 
-    // Self collision
-    return this.segments.slice(1).some(segment => 
-      segment.x === head.x && segment.y === head.y
-    );
+    
+    // Self collision (only check if snake has more than 4 segments)
+    if (this.body.length > 4) {
+      return this.body.slice(1).some(segment => 
+        segment.x === head.x && segment.y === head.y
+      );
+    }
+    return false;
   }
 
-  hasEatenFood(food) {
-    const head = this.segments[0];
-    return head.x === food.x && head.y === food.y;
+  draw(ctx) {
+    ctx.fillStyle = '#00ff00';
+    this.body.forEach(segment => {
+      ctx.fillRect(
+        segment.x * this.gridSize,
+        segment.y * this.gridSize,
+        this.gridSize,
+        this.gridSize
+      );
+    });
   }
 }
