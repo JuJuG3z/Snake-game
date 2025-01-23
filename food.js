@@ -1,4 +1,5 @@
 export class Food {
+
   constructor(canvasWidth, canvasHeight, gridSize) {
     this.gridSize = gridSize;
     this.x = Math.floor(Math.random() * (canvasWidth / gridSize));

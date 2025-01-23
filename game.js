@@ -25,9 +25,11 @@ export class Game {
     if (this.gameLoop) {
       clearInterval(this.gameLoop);
     }
+
     
     // Reset game state
     this.snake.reset();
+
     this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
     this.score = 0;
     this.updateScore();
@@ -38,7 +40,9 @@ export class Game {
   }
 
   update() {
+
     // Move snake
+
     this.snake.move();
     
     // Check collisions
@@ -46,17 +50,19 @@ export class Game {
       this.gameOver();
       return;
     }
+
     
     // Check if snake eats food
     if (this.snake.eat(this.food)) {
       this.score += 10;
       this.updateScore();
       this.food = new Food(this.canvas.width, this.canvas.height, this.gridSize);
-    }
+
     
     // Render game
     this.render();
   }
+
 
   render() {
     // Clear canvas
@@ -71,6 +77,7 @@ export class Game {
     
     // Draw snake
     this.snake.draw(this.ctx);
+
   }
 
   updateScore() {
@@ -80,6 +87,7 @@ export class Game {
   gameOver() {
     clearInterval(this.gameLoop);
     this.gameLoop = null;
+
     this.isGameRunning = false;
     alert(`Game Over! Final Score: ${this.score}`);
   }
@@ -92,3 +100,4 @@ export class Game {
     }
   }
 }
+
