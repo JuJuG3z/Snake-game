@@ -31,65 +31,6 @@ function draw() {
   });
   
   if (food) {
-    drawSquare(food.x, food.y, 'red');
+    drawSquare(food.x, food.y, 'orange');
   }
 }
-
-function move() {
-  const head = { ...snake[0] };
-
-  switch (direction) {
-    case 'up': head.y--; break;
-    case 'down': head.y++; break;
-    case 'left': head.x--; break;
-    case 'right': head.x++; break;
-  }
-
-  if (head.x < 0 || head.x >= canvas.width / GRID_SIZE ||
-      head.y < 0 || head.y >= canvas.height / GRID_SIZE ||
-      snake.some(segment => segment.x === head.x && segment.y === head.y)) {
-    gameOver();
-    return;
-  }
-
-  snake.unshift(head);
-
-  if (food && head.x === food.x && head.y === food.y) {
-    food = null;
-    generateFood();
-  } else {
-    snake.pop();
-  }
-}
-
-function gameLoop() {
-  move();
-  draw();
-  generateFood();
-}
-
-function startGame() {
-  if (gameLoop) return; // Prevent multiple instances
-  snake = [{ x: 10, y: 10 }];
-  direction = 'right';
-  food = null;
-  gameLoop = setInterval(gameLoop, GAME_SPEED);
-}
-
-function gameOver() {
-  clearInterval(gameLoop);
-  gameLoop = null;
-  alert('Game Over! Press OK to restart');
-  startGame();
-}
-
-document.addEventListener('keydown', (event) => {
-  switch (event.key) {
-    case 'ArrowUp': if (direction !== 'down') direction = 'up'; break;
-    case 'ArrowDown': if (direction !== 'up') direction = 'down'; break;
-    case 'ArrowLeft': if (direction !== 'right') direction = 'left'; break;
-    case 'ArrowRight': if (direction !== 'left') direction = 'right'; break;
-  }
-});
-
-startGame();
